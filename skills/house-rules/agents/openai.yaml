@@ -1,0 +1,4 @@
+interface:
+  display_name: "house-rules"
+  short_description: "Write down a directory's house rules — what it's for and what's actually in it — into a short AGENTS.md, and keep it honest with an on-demand freshness check."
+  default_prompt: "Document this directory's house rules into an AGENTS.md: read the files, work out its purpose and what's here, and cite a reference file or list extension steps only when the directory's own files actually support them."

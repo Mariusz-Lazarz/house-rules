@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run tests (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          bash --version | head -1
+          bash tests/run.sh
+
+      # macOS runners put homebrew bash 5.x first in PATH; prepend /bin so the
+      # `env bash` shebangs resolve to the stock 3.2 we claim to support.
+      - name: Run tests (macOS, system bash 3.2)
+        if: runner.os == 'macOS'
+        run: |
+          export PATH="/bin:/usr/bin:$PATH"
+          bash --version | head -1
+          bash tests/run.sh
