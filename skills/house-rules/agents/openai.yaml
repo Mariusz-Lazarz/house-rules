@@ -1,0 +1,4 @@
+interface:
+  display_name: "house-rules"
+  short_description: "Write down a directory's house rules — its local file pattern — into a short AGENTS.md, and keep it honest with an on-demand freshness check."
+  default_prompt: "Document this directory's house rules into an AGENTS.md: read the sibling files, extract the convention, cite one real reference file, and list the steps to add one more."

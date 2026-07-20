@@ -1,0 +1,9 @@
+{
+  "name": "house-rules",
+  "version": "1.0.0",
+  "description": "Every folder has house rules — write them down, keep them true. Per-directory AGENTS.md docs inferred from real sibling files, kept fresh with an on-demand check you can wire into your own pre-push hook or CI. Skill: /house-rules (<dir> | --all | --init | --check | --backfill). Self-contained Agent Skill — also runs in Codex CLI.",
+  "author": {
+    "name": "Mariusz-Lazarz",
+    "url": "https://github.com/Mariusz-Lazarz"
+  }
+}

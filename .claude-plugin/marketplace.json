@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "house-rules",
+  "description": "Every folder has house rules — write them down, keep them true. Per-directory AGENTS.md docs inferred from real files, kept honest by an on-demand freshness check you can wire into your own pipeline.",
+  "owner": {
+    "name": "Mariusz-Lazarz",
+    "url": "https://github.com/Mariusz-Lazarz"
+  },
+  "plugins": [
+    {
+      "name": "house-rules",
+      "description": "Document each directory's local file pattern into a short AGENTS.md, bulk-generate missing ones with sub-agents (--all), onboard a repo (--init), audit doc freshness on demand (--check), and baseline pre-existing docs (--backfill) — wire the same deterministic checks into your own git hook or CI for automatic enforcement.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
