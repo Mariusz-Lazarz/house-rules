@@ -1,9 +1,10 @@
 {
   "dirs": {
     "docs": "8c588488212a",
-    "skills/house-rules/scripts": "6a4efc113343",
     "tests": "badb983fe3ee"
   },
-  "ignore": [],
+  "ignore": [
+    "skills/house-rules/scripts"
+  ],
   "version": 1
 }
