@@ -32,7 +32,7 @@ then inside Claude Code:
 ### Codex & other agents
 
 The skill folder is self-contained and follows the open Agent Skills standard
-(`SKILL.md` + bundled `scripts/`), so any compatible agent can run it:
+(`SKILL.md` + bundled `scripts/` and `commands/`), so any compatible agent can run it:
 
 ```bash
 npx skills add Mariusz-Lazarz/house-rules        # installs to .agents/skills/ and
