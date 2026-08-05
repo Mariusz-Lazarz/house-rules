@@ -29,20 +29,29 @@ then inside Claude Code:
 /plugin install house-rules
 ```
 
-### Codex & other agents
+### Manual install (no plugin, no npx)
 
-The skill folder is self-contained and follows the open Agent Skills standard
-(`SKILL.md` + bundled `scripts/` and `commands/`), so any compatible agent can run it:
+The skill folder is self-contained (`SKILL.md` + bundled `scripts/`,
+`commands/`, `agents/`) — copy `skills/house-rules/` straight into your
+agent's own skills directory and it works, no tooling required:
+
+- **Claude Code**: copy to `~/.claude/skills/house-rules/` (user-wide) or
+  `<repo>/.claude/skills/house-rules/` (per repo). `/house-rules` and every
+  mode below work exactly like the plugin install — same files, same
+  behavior, verified byte-identical.
+- **Codex & other Agent Skills-standard agents**: copy to
+  `~/.agents/skills/house-rules/` (user-wide) or `<repo>/.agents/skills/`
+  (per repo) — that's the location Codex discovers natively.
+
+### Codex & other agents via npx
 
 ```bash
 npx skills add Mariusz-Lazarz/house-rules        # installs to .agents/skills/ and
                                                 # symlinks into detected agents
 ```
 
-or copy `skills/house-rules/` manually into `~/.agents/skills/` (user-wide) or
-`<repo>/.agents/skills/` (per repo). Codex discovers both locations natively.
 Every command below (`--init`, `--check`, `--all`, `--backfill`, `<dir>`)
-works the same in Codex as in Claude Code.
+works the same everywhere — plugin, manual copy, or npx.
 
 ## Quick start
 
