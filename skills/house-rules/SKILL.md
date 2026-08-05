@@ -1,26 +1,16 @@
 ---
 name: house-rules
 description: >
-  Write down a directory's house rules — what it's for and what's actually in
-  it — into a short AGENTS.md (120–250 words). Reads actual files — naming,
-  structure, imports, test co-location, and who calls into this directory from
-  elsewhere — then writes "here is the purpose, here is what's here, here is
-  the reference and how to extend it (when either genuinely applies)." Never
-  asks about the project; infers everything from files on disk. Cites a real
-  file as the canonical reference or entry point when one stands out; omits it
-  when the directory's files serve genuinely distinct responsibilities.
-  `--all` bulk-documents every candidate directory via sub-agents; `--init`
-  onboards a project (creates the manifest `--check` reads, scaffolds the root
-  index); `--check` audits doc freshness on demand (report only, changes nothing);
-  `--backfill` records baselines for area docs that predate the manifest.
-  Use when you want agents to understand a focused folder's purpose and
-  convention: API handlers, UI components, database migrations, hooks,
-  workers, a single integration client (SES, Stripe, Twilio), middleware, etc.
-  Trigger phrases: "house rules", "what are the house rules here", "write the
-  house rules for this folder", "document this directory's pattern", "add agents
-  doc here", "what is the pattern here", "are the house rules up to date",
-  "audit the agents docs", "backfill the baselines", "these docs predate the
-  manifest".
+  Modes: <dir> | --all | --init | --check | --backfill. Writes a directory's
+  purpose and convention into a short AGENTS.md (120–250 words), inferred
+  from real files on disk — never asked. `--all` bulk-documents candidate
+  directories via sub-agents; `--init` onboards a repo (manifest + root
+  index); `--check` audits doc freshness, read-only; `--backfill` baselines
+  pre-existing docs. Use for API handlers, UI components, migrations, hooks,
+  workers, a single integration client, middleware, etc. Trigger phrases:
+  "house rules", "document this directory's pattern", "are the house rules
+  up to date", "audit the agents docs", "backfill the baselines".
+argument-hint: [<dir>] | --all | --init | --check | --backfill
 ---
 
 # /house-rules — Write Down Each Folder's House Rules
