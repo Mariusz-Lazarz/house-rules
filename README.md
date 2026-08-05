@@ -10,12 +10,14 @@ convention** into a short `AGENTS.md` — and then keeps those docs honest with
 an on-demand freshness check (`/house-rules --check`) you can wire into your
 own pre-push hook or CI, if you want it automatic.
 
-Every area doc answers two questions always, and a third and fourth when the
-directory's own files support them, inferred from the files actually on disk
-(never from asking you):
+Every area doc answers two questions always, a third when the directory's own
+files support it, and a fourth-and-fifth only when the task at hand is cloning
+a same-shape resource — inferred from the files actually on disk (never from
+asking you):
 
-> here is the purpose → here is what's here → here is the reference and how to
-> extend it (when either genuinely applies)
+> here is the purpose → here is what's here → here are its tripwires, if any →
+> here is the reference and how to extend it (when cloning a same-shape
+> resource applies)
 
 ## Install
 
@@ -75,11 +77,11 @@ picks a canonical reference file when one genuinely stands out, and writes a
 ```markdown
 # Area: handlers — HTTP endpoint handlers for the public API
 > See @AGENTS.md at the repo root for repo-wide rules.
-## Purpose      ← what this directory does, and how it's called from elsewhere
-## What's here  ← evidence-based inventory: shape (pattern dirs) or per-file jobs (logic dirs)
-## Reference    ← the one file to start from — OPTIONAL, omitted if no natural pick
-## Extending    ← numbered clone-steps or a concrete extension point — OPTIONAL, omitted if neither exists
-## Tripwires    ← observed "never do X" rules — OPTIONAL, only if real
+## Purpose      ← what decisions this directory owns vs. what's decided elsewhere
+## What's here  ← evidence-based inventory: shape (pattern dirs) or per-file jobs (logic dirs), plus relations to other entities
+## Tripwires    ← non-obvious cross-file facts (casing, error convention, validation boundary) — OPTIONAL, pays off on any task
+## Reference    ← the one file to start from — OPTIONAL, relevant only when cloning a same-shape resource
+## Extending    ← numbered clone-steps or a concrete extension point — OPTIONAL, same clone-only relevance
 ```
 
 Runs on an existing doc → **surgical update**, not a rewrite (your wording is

@@ -4,10 +4,12 @@
 
 ## Purpose
 
-Explains the skill's modes to a human reader; the root `README.md`'s
-"Documentation" section links here, treating `docs/README.md` as the index.
-Nothing else in the repo reads these files — pure prose, never parsed by the
-scripts or the skill itself.
+Owns how each invocation mode is explained to a human reader — page layout,
+worked examples, cross-links. Behavior itself is decided in
+`@skills/house-rules/SKILL.md`; nothing here is parsed by the scripts or the
+skill, so `docs/` can only go stale, never break functionality. The root
+`README.md`'s "Documentation" section links here, treating `docs/README.md`
+as the index.
 
 ## What's here
 
@@ -18,6 +20,15 @@ paragraph, then `##` sections — pipeline steps, tables, guarantees, edge
 cases. Pages cross-link with relative links like `[init.md](init.md)`.
 `README.md` is the index: a pointer to `how-it-works.md` plus a table
 (Invocation | Doc | In one line), one row per page.
+
+## Tripwires
+
+- Do not give shared machinery (the staleness engine, lock manifest, bundled
+  scripts) its own page — `README.md` states it is described where it is
+  used.
+
+*Only relevant if you're adding a new resource of the same shape — skip the
+next two sections otherwise.*
 
 ## Reference
 
@@ -31,11 +42,5 @@ section style the other mode pages follow.
    framing paragraph, then copy the layout from `@./directory-mode.md`.
 3. Cross-link related pages with relative links, not absolute paths.
 4. Register the page in `@./README.md`'s invocation table.
-
-## Tripwires
-
-- Do not give shared machinery (the staleness engine, lock manifest, bundled
-  scripts) its own page — `README.md` states it is described where it is
-  used.
 
 <!-- Maintained by /house-rules. Pattern changed? Run: /house-rules docs -->

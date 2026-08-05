@@ -271,6 +271,16 @@ Read the following (skip anything that doesn't apply):
    - internal structure (sections, ordering, naming conventions inside the file)
    - co-located tests/styles/types? (are there sibling `*.test.*`, `*.spec.*`,
      `*.styles.*`, `*.types.*` files next to each unit?)
+   - cross-layer field-name/casing consistency (request body vs. response vs.
+     DB column/query — flag any mismatch you find)
+   - the error-signaling convention in use (throw + centralized handler vs.
+     inline status-setting vs. a Result/Either type) and whether it actually
+     holds across the files read
+   - the validation-vs-persistence boundary — where input gets checked
+     relative to where DB/store calls happen
+   - foreign-key/join/cross-resource references visible in the files read —
+     which other entities/tables this directory's files touch, and how
+     (evidence base for `## What's here`'s relations clause below)
 3. **Check for a barrel or index.** Does `index.*`, `mod.rs`, `__init__.py`, or
    similar exist? What does it re-export?
 4. **Spot the test pattern.** Co-located (`*.test.ts`) or parallel tree
@@ -312,11 +322,12 @@ Decide which kind of directory this is, from the Step 1 survey:
 
 ### Step 3 — Draft
 
-Write the file per **Output structure** below. Target 120–250 words of body (headings
-and the maintenance footer excluded from the count). Under 120 means the pattern wasn't captured; over 250
+Write the file per **Output structure** below. Target 120–250 words of body (headings,
+the cloning-scope editorial note, and the maintenance footer excluded from the count).
+Under 120 means the pattern wasn't captured; over 250
 means scope crept into territory that belongs in the root `AGENTS.md`. The floor
-applies regardless of how many optional sections are present — if `## Reference`
-and `## Extending` are both genuinely omitted, put the missing depth into
+applies regardless of how many optional sections are present — if `## Tripwires`,
+`## Reference`, and `## Extending` are all genuinely omitted, put the missing depth into
 `## Purpose` (a fuller account of the wiring) and `## What's here` (a more
 complete per-file inventory), never into an invented section.
 
@@ -358,18 +369,26 @@ Then, each of the following is a hard gate. Revise if any fails.
    extension point** (a real enum, factory, registry, config file, or
    clone-target seen in Step 1) — never generic filler. If omitted, no such
    point is visible in the code.
-6. **Body is 120–250 words.** Count the body (headings and the maintenance footer
-   don't count). Trim if over; add specifics if under.
-7. **No multi-line code blocks.** Single-line inline examples are fine. Anything
+6. **`## Tripwires`, if present, requires synthesis across files, not a
+   restatement of one file.** Each bullet must be a fact an agent would
+   otherwise re-derive by reading multiple files — a casing/naming mismatch
+   between layers, the error-signaling convention actually used, the
+   validation/persistence boundary, or a comparably non-obvious cross-file
+   fact. Never something visible from glancing at a single file. If omitted,
+   no such fact surfaced in Step 1.
+7. **Body is 120–250 words.** Count the body (headings, the cloning-scope
+   editorial note, and the maintenance footer don't count). Trim if over; add
+   specifics if under.
+8. **No multi-line code blocks.** Single-line inline examples are fine. Anything
    longer → `@`-reference instead.
-8. **No generic advice.** If you could have written a sentence without opening the
+9. **No generic advice.** If you could have written a sentence without opening the
    directory, cut it.
-9. **No padding.** No filler ("just", "really", "basically", "essentially"),
-   hedging ("it might be worth", "you could consider"), pleasantries, or
-   connective fluff ("however", "furthermore", "in addition"). Fragments are
-   fine wherever the subject is obvious from the heading — full grammatical
-   sentences aren't required. Inline code, paths, commands, proper nouns, and
-   version numbers stay verbatim, never paraphrased.
+10. **No padding.** No filler ("just", "really", "basically", "essentially"),
+    hedging ("it might be worth", "you could consider"), pleasantries, or
+    connective fluff ("however", "furthermore", "in addition"). Fragments are
+    fine wherever the subject is obvious from the heading — full grammatical
+    sentences aren't required. Inline code, paths, commands, proper nouns, and
+    version numbers stay verbatim, never paraphrased.
 
 ### Step 5 — Write
 
@@ -389,6 +408,8 @@ directory's present contents.
 Report back:
 - path written
 - body word count
+- `## Tripwires`: bullets included (one-line summary) or "omitted — no
+  cross-file fact surfaced in Step 1"
 - `## Reference`: file chosen and why, or "omitted — no single file was a
   stronger 'start here' pick than the others"
 - `## Extending`: included (one-sentence summary) or "omitted — no extension
@@ -431,7 +452,7 @@ Preserve the user's authorial voice in anything that is still accurate.
    **Output structure**) is missing — docs written before it existed — append it
    as the last line.
 
-5. **Re-run the quality check** (same nine gates as the Create path) on the
+5. **Re-run the quality check** (same ten gates as the Create path) on the
    result. If the body has grown past 250 words from MISSING additions, trim
    lower-leverage KEEP content rather than dropping the new information.
 
@@ -442,8 +463,8 @@ Preserve the user's authorial voice in anything that is still accurate.
 
 8. **Report:** path, new body word count, one line each on what was updated, removed, and
    added (e.g. *"1 updated (reference file renamed), 0 removed, 1 added (extension
-   point in Extending)"*), whether `## Reference`/`## Extending` are now included or
-   omitted, the subdirectory index result (created / entry added / entry updated
+   point in Extending)"*), whether `## Tripwires`/`## Reference`/`## Extending` are now
+   included or omitted, the subdirectory index result (created / entry added / entry updated
    / skipped), and the recorded shape hash.
 
 ---
@@ -486,12 +507,12 @@ and still leaving the shared files to Step 5.)
 Each sub-agent's prompt must instruct it to:
 
 - follow this skill's **Create path** for `<dir>` (Survey → reference file (or
-  confirm there isn't one) → draft → the nine quality gates → single `Write`);
+  confirm there isn't one) → draft → the ten quality gates → single `Write`);
 - write **only** `<dir>/AGENTS.md` — it must NOT touch the root `AGENTS.md` index or
   `.claude/house-rules.lock.json`; the parent performs both "always" steps afterward;
-- report back: path written, body word count, whether `## Reference`/`## Extending`
-  were included or omitted, and the summary phrase from its `# Area: … — <summary>`
-  heading.
+- report back: path written, body word count, whether `## Tripwires`/`## Reference`/
+  `## Extending` were included or omitted, and the summary phrase from its
+  `# Area: … — <summary>` heading.
 
 ### Step 5 — Serialize the shared files (parent)
 
@@ -604,10 +625,10 @@ Scoped `AGENTS.md` docs, maintained by `/house-rules`.
 
 ## Purpose
 
-<1–2 sentences: what this directory is responsible for, and how it's wired
-into the rest of the system — grounded in the call-sites/imports found in
-Step 1.6, not assumption. If no external caller was found, say so briefly
-instead of inventing a role.>
+<1–2 sentences: what decisions this directory owns versus what's decided
+elsewhere — grounded in the call-sites/imports found in Step 1.6, not
+assumption. If no external caller was found, say so briefly instead of
+inventing a role.>
 
 ## What's here
 
@@ -616,7 +637,20 @@ dominant unit (component, handler, migration, hook, …), its naming convention
 with one inline example, its internal structure, what it imports, and what it
 exports. Note whether tests/styles/types are co-located or live elsewhere.
 Logic directory: name the real files and each one's distinct job — no forced
-"dominant unit" framing.>
+"dominant unit" framing. Either kind: note relations to other entities/tables
+visible in the code (foreign keys, joins, cross-resource calls), if any.>
+
+## Tripwires
+
+- <A non-obvious fact an agent would otherwise have to re-derive by reading
+  multiple files — a casing/naming mismatch between layers, the
+  error-signaling convention actually used, the validation/persistence
+  boundary, or a comparable cross-file fact. Only if actually observed.>
+- <Omit this section entirely if nothing qualifies — never a restatement of
+  what one file already shows at a glance.>
+
+*Only relevant if you're adding a new resource of the same shape — skip the
+next two sections otherwise.*
 
 ## Reference
 
@@ -639,17 +673,17 @@ Logic directory: a short, concrete instruction for the one real extension
 point actually observed (e.g. "new role: add to the enum in `roles.ts` and
 update `permissions.json`").>
 
-## Tripwires
-
-- <"Never do X" rule observed in siblings — only include if actually visible.>
-- <Omit this section entirely if no tripwires are found.>
-
 <!-- Maintained by /house-rules. Pattern changed? Run: /house-rules <dir-relative-to-repo-root> -->
 ```
 
-(`## Reference`, `## Extending`, and `## Tripwires` are each independently
-optional — omit the whole heading when there's no evidence, per the
-structural checks in Step 4.)
+`## Tripwires` sits third, right after `## What's here`, because these facts
+pay off regardless of task type — clone, fix, or something new — not just
+when cloning. `## Reference` and `## Extending` sit last and are marked as
+relevant only to the cloning scenario, since that's the only case the
+benchmark behind this template showed them earning their keep. `## Reference`,
+`## Extending`, and `## Tripwires` remain each independently optional — omit
+the whole heading when there's no evidence, per the structural checks in
+Step 4.
 
 **Notes:**
 
@@ -658,24 +692,35 @@ structural checks in Step 4.)
   line, not a paragraph.
 - `## Purpose` and `## What's here` are the only two sections that are always
   present — every other section is conditional on evidence.
-- `## Purpose` is the *why* — what this directory does for the rest of the
-  system, grounded in real call-sites, not inferred from the directory name.
+- `## Purpose` is the *why* — what decisions this directory owns versus what's
+  decided elsewhere, grounded in real call-sites, not inferred from the
+  directory name.
 - `## What's here` is discovery — what already exists. For a directory of
   repeatable units this reads like the old "Shape"; for a directory of
   distinct-responsibility files it's a short inventory of each file's job
-  instead.
+  instead. Also carries relations to other entities/tables when the survey
+  found them.
+- `## Tripwires` is **still fully optional and evidence-based — omit if
+  nothing was observed**, but sits third, right after `## What's here`,
+  because these are facts an agent would otherwise re-derive from reading
+  several files every time, no matter whether the task is a clone, a fix, or
+  something new: casing/naming mismatches between layers, the error-signaling
+  convention in use, the validation/persistence boundary. Promotion changes
+  its position and the range of facts it looks for — it does not make the
+  section mandatory.
 - `## Reference` pins one file — the agent reads one, not five. Omit the whole
   heading, not just its content, when no file is genuinely more "start here"
-  than another.
+  than another. Relevant only when the task is cloning a same-shape resource.
 - `## Extending` is the reason this file exists when there's a repeatable
   pattern or a visible extension point. Omit the whole heading, not just its
   content, when neither exists — never pad it with generic advice to fill the
-  space.
-- `## Tripwires` is optional and evidence-based — omit if nothing was observed.
+  space. Same clone-only relevance as `## Reference`, and the two are placed
+  together at the end for that reason.
 - The closing HTML comment is the **maintenance footer**: invisible in rendered
   markdown, visible to any agent reading the raw file. It names the exact refresh
   command so nobody "fixes" the doc by hand when the pattern changes. It is
-  metadata, not body — excluded from the 120–250 word count — and always the last
+  metadata, not body — excluded from the 120–250 word count, same as the
+  cloning-scope editorial note above `## Reference` — and always the last
   line of the file.
 - Do not add sections beyond these five. If something important doesn't fit here,
   it belongs in the root `AGENTS.md`.

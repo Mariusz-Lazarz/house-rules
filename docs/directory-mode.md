@@ -3,7 +3,8 @@
 The core mode. Reads the files that already live in a directory and writes a short
 `<dir>/AGENTS.md` (120–250 words of body) capturing what the directory is for, and
 its local convention or per-file responsibilities: *here is the purpose → here is
-what's here → here is the reference and how to extend it, when either applies.*
+what's here → here are its tripwires, if any → here is the reference and how to
+extend it, when cloning a same-shape resource applies.*
 
 It never asks what the project is or which framework you use — every sentence must
 trace back to a real file on disk. If there is nothing to infer, it says so and
@@ -26,18 +27,22 @@ more than 5 lines?
 **No (or a ≤5-line stub) → Create path**
 
 1. Survey: list siblings, read 2–4 representative files (imports, export style,
-   internal structure, co-located tests/styles/types), check for a barrel/index,
-   spot the test pattern, and grep the repo for external call-sites/imports of
-   this directory to ground its `## Purpose`.
+   internal structure, co-located tests/styles/types, cross-layer field-name/
+   casing consistency, the error-signaling convention in use, the
+   validation-vs-persistence boundary, and any foreign-key/join/cross-resource
+   references), check for a barrel/index, spot the test pattern, and grep the
+   repo for external call-sites/imports of this directory to ground its
+   `## Purpose`.
 2. Pick **one** reference sibling **if one genuinely stands out** — the file
    closest to median size and complexity, not the smallest stub, not a special
    case — otherwise skip and omit `## Reference` (common when files serve
    distinct, non-repeatable responsibilities).
-3. Draft the doc, then pass eight quality gates (no invented facts, no
-   repo-level scope, Purpose grounded in real call-sites, Reference/Extending
-   included only when evidence-backed, actionable Extending steps when present,
-   120–250 words, no multi-line code blocks, no generic advice). Any failure →
-   revise before writing.
+3. Draft the doc, then pass the quality gates (no invented facts, no
+   repo-level scope, Purpose grounded in real call-sites, Tripwires bullets
+   that require cross-file synthesis rather than restating one file,
+   Reference/Extending included only when evidence-backed, actionable
+   Extending steps when present, 120–250 words, no multi-line code blocks, no
+   generic advice). Any failure → revise before writing.
 4. Single `Write`.
 
 **Yes → Update path** (a local `CLAUDE.md` counts too, and is refreshed in
@@ -69,22 +74,28 @@ lines changed classification.
 ```markdown
 # Area: <dir> — <one-phrase description>
 > See @AGENTS.md at the repo root for repo-wide rules.
-## Purpose        ← what this dir is for, and how it's wired into the rest of the system
-## What's here    ← evidence-based inventory, one paragraph — always present
+## Purpose        ← what decisions this dir owns vs. what's decided elsewhere
+## What's here    ← evidence-based inventory + relations to other entities — always present
+## Tripwires      ← non-obvious cross-file facts (casing, error convention, validation
+                    boundary); OPTIONAL, read first among the optional sections since
+                    it pays off on any task, not just cloning
+[one-line note: relevant only when cloning a same-shape resource]
 ## Reference      ← the single canonical/entry-point sibling, @-cited — OPTIONAL
 ## Extending      ← numbered clone-steps, or a concrete extension point — OPTIONAL
-## Tripwires      ← observed "never do X" rules; omitted when none were seen
 <!-- Maintained by /house-rules. Pattern changed? Run: /house-rules <dir> -->
 ```
 
-`## Purpose` and `## What's here` are always present. `## Reference`,
-`## Extending`, and `## Tripwires` are each included only when the directory's
+`## Purpose` and `## What's here` are always present. `## Tripwires`,
+`## Reference`, and `## Extending` are each included only when the directory's
 files actually support them — a single cohesive module (an SDK client, a
-config file) may legitimately carry only Purpose and What's here.
+config file) may legitimately carry only Purpose and What's here. `## Reference`
+and `## Extending` matter only when the task is cloning a same-shape resource;
+`## Tripwires` matters regardless of task type.
 
 The closing HTML comment is a maintenance footer: invisible when rendered, but it
 tells anyone reading the raw file how to refresh the doc instead of editing it by
-hand. It doesn't count toward the word budget.
+hand. It and the one-line cloning-scope note above `## Reference` don't count
+toward the word budget.
 
 No other sections. Anything that doesn't fit belongs in the root rules file.
 
