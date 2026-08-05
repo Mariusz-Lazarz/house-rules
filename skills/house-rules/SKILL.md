@@ -10,7 +10,7 @@ description: >
   workers, a single integration client, middleware, etc. Trigger phrases:
   "house rules", "document this directory's pattern", "are the house rules
   up to date", "audit the agents docs", "backfill the baselines".
-argument-hint: [<dir>] | --all | --init | --check | --backfill
+argument-hint: "[<dir>] | --all | --init | --check | --backfill"
 ---
 
 # /house-rules — Write Down Each Folder's House Rules
