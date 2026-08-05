@@ -330,6 +330,15 @@ and `## Extending` are both genuinely omitted, put the missing depth into
 `## Purpose` (a fuller account of the wiring) and `## What's here` (a more
 complete per-file inventory), never into an invented section.
 
+Write dense, not padded — the word budget buys evidence, not filler. Drop
+articles, hedging ("it might be worth", "this helps ensure"), pleasantries,
+and connective fluff ("however", "furthermore", "in addition") — state the
+fact plainly. Prefer fragments over full sentences where the subject is
+obvious from the heading ("Handles X for Y" beats "This directory is
+responsible for handling X for Y"). Never compress the words that carry
+information: inline code, `@`-references, file paths, command names, proper
+nouns, and version numbers are copied verbatim, never paraphrased or dropped.
+
 ### Step 4 — Quality check (run before writing)
 
 First, two structural checks — these decide the doc's shape before the content
@@ -365,6 +374,12 @@ Then, each of the following is a hard gate. Revise if any fails.
    longer → `@`-reference instead.
 8. **No generic advice.** If you could have written a sentence without opening the
    directory, cut it.
+9. **No padding.** No filler ("just", "really", "basically", "essentially"),
+   hedging ("it might be worth", "you could consider"), pleasantries, or
+   connective fluff ("however", "furthermore", "in addition"). Fragments are
+   fine wherever the subject is obvious from the heading — full grammatical
+   sentences aren't required. Inline code, paths, commands, proper nouns, and
+   version numbers stay verbatim, never paraphrased.
 
 ### Step 5 — Write
 
@@ -426,7 +441,7 @@ Preserve the user's authorial voice in anything that is still accurate.
    **Output structure**) is missing — docs written before it existed — append it
    as the last line.
 
-5. **Re-run the quality check** (same eight gates as the Create path) on the
+5. **Re-run the quality check** (same nine gates as the Create path) on the
    result. If the body has grown past 250 words from MISSING additions, trim
    lower-leverage KEEP content rather than dropping the new information.
 
@@ -481,7 +496,7 @@ and still leaving the shared files to Step 5.)
 Each sub-agent's prompt must instruct it to:
 
 - follow this skill's **Create path** for `<dir>` (Survey → reference file (or
-  confirm there isn't one) → draft → the eight quality gates → single `Write`);
+  confirm there isn't one) → draft → the nine quality gates → single `Write`);
 - write **only** `<dir>/AGENTS.md` — it must NOT touch the root `AGENTS.md` index or
   `.claude/house-rules.lock.json`; the parent performs both "always" steps afterward;
 - report back: path written, body word count, whether `## Reference`/`## Extending`
