@@ -10,7 +10,7 @@ Then one page per invocation mode:
 |---|---|---|
 | `/house-rules` · `/house-rules <dir>` · `/house-rules <file.md>` | [directory-mode.md](directory-mode.md) | Document (or refresh) one directory's purpose and local convention |
 | `/house-rules --all` | [all.md](all.md) | Find every undocumented candidate directory and document each via sub-agents |
-| `/house-rules --init` | [init.md](init.md) | Onboard a repo: create the manifest and scaffold the root index, with consent |
+| `/house-rules --init` | [init.md](init.md) | Onboard a repo: create the manifest and add the static root note, with consent |
 | `/house-rules --check` | [check.md](check.md) | Audit doc freshness on demand — report only, changes nothing |
 | `/house-rules --backfill` | [backfill.md](backfill.md) | Record manifest baselines for area docs that predate the manifest |
 

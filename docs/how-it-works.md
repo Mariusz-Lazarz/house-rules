@@ -9,10 +9,10 @@ ships the checks, not an installed hook.
 | Part | Where it lives | What it is |
 |---|---|---|
 | Skill `/house-rules` | plugin, `skills/house-rules/` | LLM instructions for writing/refreshing area docs (`<dir>`, `--all`, `--init`, `--check`, `--backfill`); the folder is self-contained (scripts bundled inside), so it also runs as a portable Agent Skill in Codex & friends |
-| Staleness engine | skill, `skills/house-rules/scripts/staleness.sh` | plain bash+python: `write` / `check` / `hash` / `discover` / `ignore`; never invokes an LLM |
+| Staleness engine | skill, `skills/house-rules/scripts/staleness.sh` | plain bash+python: `write` / `check` / `hash` / `discover` / `stale` / `ignore`; never invokes an LLM |
 | Backfiller | skill, `skills/house-rules/scripts/staleness-backfill.sh` | baselines pre-existing docs; fills only missing entries; run via `/house-rules --backfill`, never invoked by hand |
 | Area docs | your repo, `<dir>/AGENTS.md` | the product: 120–250-word purpose + local-convention docs |
-| Root index | your repo, root `AGENTS.md`/`CLAUDE.md` | `## Subdirectory Knowledge` — one bullet per area doc |
+| Root note | your repo, root `AGENTS.md`/`CLAUDE.md` | `## Subdirectory Knowledge` — a static pointer written once by `--init`, telling agents to read `<dir>/AGENTS.md` on demand instead of loading a directory list upfront |
 | Manifest | your repo, `.claude/house-rules.lock.json` | shape-hash baselines (`dirs`) + discovery suppressions (`ignore`); also the per-repo opt-in marker `--check` (or your own gate) looks for |
 
 Everything stateful lives in **your repo**; the plugin itself is stateless and
@@ -40,9 +40,9 @@ entire trick.
 ```
 install plugin          →  skill available everywhere; nothing installed in any repo yet
 /house-rules --init      →  (per repo, with consent) manifest created,
-                           root index scaffolded
-/house-rules <dir>|--all →  area docs written, index bullets upserted,
-                           baselines recorded in the manifest
+                           static root note added
+/house-rules <dir>|--all →  area docs written, baselines recorded in the
+                           manifest
 … normal work …         →  code changes freely; nothing watches automatically
 /house-rules --check     →  (anytime) drift + discovery, reported — nothing
                            blocked, nothing written
@@ -110,9 +110,40 @@ cand="$("$staleness" discover)"
 [ -z "$cand" ] || { printf '%s\n' "$cand"; exit 1; }
 ```
 
-Both use the exact same engine `/house-rules --check` uses — a clean
-`--check` today means either recipe would pass too. Levers available to
-either:
+**A git `post-commit` hook** (`.git/hooks/post-commit`) — same idea, but
+after the fact: a commit already happened by the time this fires, so there's
+nothing left to block. It just tells you right away instead of waiting for
+the next push or CI run. Uses `stale` — the same drift check as `check`, but
+one bare dir name per line instead of a formatted report, which is what a
+hook printing a quick nudge actually wants:
+
+```sh
+#!/bin/sh
+STALENESS=/path/to/house-rules/skills/house-rules/scripts/staleness.sh
+ROOT="$(git rev-parse --show-toplevel)" || exit 0
+cd "$ROOT" || exit 0
+[ -f "$ROOT/.claude/house-rules.lock.json" ] || exit 0   # this repo never ran --init
+
+stale="$("$STALENESS" stale)"
+[ -z "$stale" ] || { echo "house-rules: stale after this commit —"; printf '  %s\n' $stale; echo "  → refresh with: /house-rules <dir>"; }
+
+cand="$("$STALENESS" discover)"
+[ -z "$cand" ] || { echo "house-rules: undocumented candidates —"; printf '%s\n' "$cand"; }
+
+exit 0   # never fail a commit that already happened
+```
+
+This project doesn't ship a hook that has Claude regenerate the docs for you
+here. `/house-rules <dir>` is an LLM skill — surveying files, drafting prose,
+running quality gates — not a deterministic rebuild, so there's no script to
+invoke non-interactively with the same reliability `staleness.sh` gives the
+checks above. Refreshing is still one command away (`/house-rules <dir>`,
+named right in the hook's own output); it's just a command you run, not one
+this project runs for you.
+
+All three recipes use the exact same engine `/house-rules --check` uses — a
+clean `--check` today means all three would pass too. Levers available to
+any of them:
 
 | Lever | Effect |
 |---|---|

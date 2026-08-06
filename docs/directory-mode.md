@@ -56,18 +56,18 @@ lines changed classification.
 
 ## What a run also does (both paths)
 
-1. **Root index upsert** — one bullet per doc in the `## Subdirectory Knowledge`
-   list of the root `AGENTS.md`/`CLAUDE.md` (`- @<dir>/AGENTS.md — <summary>`),
-   keyed by path, sorted, idempotent. Only that section is ever touched.
-2. **Shape hash** — records the directory's current shape into
-   `.claude/house-rules.lock.json` via the bundled `staleness.sh write <dir>`,
-   so `/house-rules --check` (or a gate you wire in yourself) can later detect
-   drift for free. The hash is built from
-   git blob SHAs of the directory's direct tracked files (excluding the doc
-   itself — `AGENTS.md`/`CLAUDE.md`), hashed from the current worktree content
-   in milliseconds; no LLM is involved. A custom target file (say `NOTES.md`)
-   is not on that exclusion list — it counts as a regular file, so hand-editing
-   it registers as drift until the next `/house-rules` run re-baselines.
+Every run (Create or Update) records the directory's current shape as a
+**shape hash** into `.claude/house-rules.lock.json` via the bundled
+`staleness.sh write <dir>`, so `/house-rules --check` (or a gate you wire in
+yourself) can later detect drift for free. The hash is built from git blob
+SHAs of the directory's direct tracked files (excluding the doc itself —
+`AGENTS.md`/`CLAUDE.md`), hashed from the current worktree content in
+milliseconds; no LLM is involved. A custom target file (say `NOTES.md`) is not
+on that exclusion list — it counts as a regular file, so hand-editing it
+registers as drift until the next `/house-rules` run re-baselines.
+
+It never touches the root `## Subdirectory Knowledge` note — that's a static
+pointer written once by `--init`, not a per-directory list this mode updates.
 
 ## Output format
 

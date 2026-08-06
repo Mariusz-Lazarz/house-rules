@@ -25,6 +25,9 @@
 #                                  #   but have no AGENTS.md (informational; exit 0,
 #                                  #   except exit 1 on an unparseable manifest —
 #                                  #   fail closed, same as `check`)
+#   staleness.sh stale              # like `check`, but prints one stale dir per
+#                                    # line, nothing else — for scripts/hooks
+#                                    # (mirrors `discover`'s script-friendly output)
 #   staleness.sh ignore   <dir>    # mark <dir> as never-a-candidate for discover
 #
 # Tuning (env vars):
@@ -105,6 +108,23 @@ PY
   echo "recorded $dir -> $h in $MANIFEST"
 }
 
+# _manifest_dirs_ok — true (silent) if $MANIFEST is absent, or present and
+# parses with `dirs` shaped as an object. check/stale both call this first so
+# "fail closed on a mangled manifest" logic lives in exactly one place.
+_manifest_dirs_ok() {
+  [ -f "$MANIFEST" ] || return 0
+  MANIFEST="$MANIFEST" python3 -c \
+    'import json,os; d=json.load(open(os.environ["MANIFEST"])); assert isinstance(d.get("dirs", {}), dict)' \
+    2>/dev/null
+}
+
+# _manifest_dirs — print "<dir>\t<hash>" per manifest entry, nothing if no
+# manifest. Assumes _manifest_dirs_ok already passed.
+_manifest_dirs() {
+  [ -f "$MANIFEST" ] || return 0
+  MANIFEST="$MANIFEST" python3 -c 'import json,os;[print(f"{k}\t{v}") for k,v in json.load(open(os.environ["MANIFEST"])).get("dirs",{}).items()]'
+}
+
 cmd_check() {
   if [ ! -f "$MANIFEST" ]; then
     echo "no manifest ($MANIFEST) — nothing to check"
@@ -114,9 +134,7 @@ cmd_check() {
   # A present-but-unparseable manifest must fail closed: the read loop below
   # would get zero lines from a crashed parser and silently pass, disarming the
   # gate exactly when the lock file was mangled (typically a botched merge).
-  if ! MANIFEST="$MANIFEST" python3 -c \
-    'import json,os; d=json.load(open(os.environ["MANIFEST"])); assert isinstance(d.get("dirs", {}), dict)' \
-    2>/dev/null; then
+  if ! _manifest_dirs_ok; then
     echo "⚠ $MANIFEST cannot be parsed (merge conflict? hand edit?) — fix or delete it, then re-run /house-rules"
     stale=1
   else
@@ -132,8 +150,31 @@ cmd_check() {
         echo "    → re-run:  /house-rules $dir"
         stale=1
       fi
-    done < <(MANIFEST="$MANIFEST" python3 -c 'import json,os;[print(f"{k}\t{v}") for k,v in json.load(open(os.environ["MANIFEST"])).get("dirs",{}).items()]')
+    done < <(_manifest_dirs)
   fi
+  return "$stale"
+}
+
+# cmd_stale — print one stale manifest dir per line (no decorative markers),
+# for scripts/hooks that need a clean list instead of `check`'s human report.
+# Exit 1 if any dir is stale or the manifest can't be parsed (fail closed,
+# same convention as `check`); exit 0 if clean or there's no manifest yet.
+cmd_stale() {
+  [ -f "$MANIFEST" ] || return 0
+  if ! _manifest_dirs_ok; then
+    echo "$MANIFEST cannot be parsed (merge conflict? hand edit?) — fix or delete it" >&2
+    return 1
+  fi
+  local stale=0 dir want got
+  while IFS=$'\t' read -r dir want; do
+    if [ -L "$dir" ] || [ ! -d "$dir" ]; then
+      printf '%s\n' "$dir"; stale=1; continue
+    fi
+    got="$(dir_hash "$dir")"
+    if [ "$got" != "$want" ]; then
+      printf '%s\n' "$dir"; stale=1
+    fi
+  done < <(_manifest_dirs)
   return "$stale"
 }
 
@@ -251,6 +292,7 @@ case "${1:-}" in
   write)    shift; cmd_write    "$@" ;;
   hash)     shift; cmd_hash     "$@" ;;
   discover) shift; cmd_discover "$@" ;;
+  stale)    shift; cmd_stale    "$@" ;;
   ignore)   shift; cmd_ignore   "$@" ;;
-  *) echo "usage: staleness.sh {check|write <dir>|hash <dir>|discover|ignore <dir>}" >&2; exit 2 ;;
+  *) echo "usage: staleness.sh {check|write <dir>|hash <dir>|discover|stale|ignore <dir>}" >&2; exit 2 ;;
 esac

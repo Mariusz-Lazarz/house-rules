@@ -1,6 +1,6 @@
 ## Subdirectory Knowledge
 
-Scoped `AGENTS.md` docs, maintained by `/house-rules`.
-
-- @docs/AGENTS.md — one page per house-rules invocation mode, plus an overview and index
-- @tests/AGENTS.md — bash test suite for the house-rules deterministic scripts
+Dirs may carry their own `AGENTS.md` — local conventions, reference files,
+and tripwires, maintained by `/house-rules`. Read `<dir>/AGENTS.md` before
+editing files in that directory. None are loaded upfront — fetch the one you
+need, when you need it.

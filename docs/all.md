@@ -49,13 +49,14 @@ Approved directories are processed by sub-agents, at most ~4 in flight. Each
 sub-agent runs the normal Create path for its directory and writes **only**
 `<dir>/AGENTS.md`.
 
-### 5. Serialize the shared files
+### 5. Serialize the manifest
 
-Two files are shared by every run — the root `## Subdirectory Knowledge` index and
-`.claude/house-rules.lock.json` — so sub-agents are forbidden from touching them.
-After all batches finish, the parent updates both **serially**: one index bullet
-and one `staleness.sh write <dir>` per documented directory. This is what
-prevents concurrent-write corruption.
+`.claude/house-rules.lock.json` is shared by every run, so sub-agents are
+forbidden from touching it. After all batches finish, the parent writes
+baselines **serially**: one `staleness.sh write <dir>` per documented
+directory. This is what prevents concurrent-write corruption. The root
+`## Subdirectory Knowledge` note, if present, is static — written once by
+`--init` — and is never touched by `--all`.
 
 ### 6. Report
 

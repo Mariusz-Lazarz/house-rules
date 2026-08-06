@@ -58,7 +58,7 @@ works the same everywhere — plugin, manual copy, or npx.
 ## Quick start
 
 ```
-/house-rules --init        # onboard a repo: create the manifest, scaffold the root index (asks first)
+/house-rules --init        # onboard a repo: create the manifest, add the root note (asks first)
 /house-rules src/handlers  # document one directory
 /house-rules --all         # find every undocumented candidate dir, document each via sub-agents
 /house-rules --check       # audit: drift + undocumented dirs + missing baselines, report only
@@ -87,10 +87,10 @@ picks a canonical reference file when one genuinely stands out, and writes a
 Runs on an existing doc → **surgical update**, not a rewrite (your wording is
 preserved wherever it is still accurate).
 
-After every doc it also:
-1. upserts a one-line entry into a `## Subdirectory Knowledge` index in your root
-   `AGENTS.md`/`CLAUDE.md`, so agents landing at the root see what local docs exist;
-2. records the directory's **shape hash** into `.claude/house-rules.lock.json`.
+After every doc it also records the directory's **shape hash** into
+`.claude/house-rules.lock.json`. It never touches the root `## Subdirectory
+Knowledge` note — that's a static pointer written once by `--init`, not a
+growing per-directory list.
 
 ### `/house-rules --all` — bulk mode
 
@@ -105,7 +105,8 @@ index, lock manifest) are updated serially by the parent to avoid write races.
 Consent-driven scaffolding, generates **zero** docs:
 - creates `.claude/house-rules.lock.json` — the shape-hash baselines and
   discovery ignore list that `/house-rules --check` reads;
-- adds an empty `## Subdirectory Knowledge` section to your root rules file.
+- adds a static `## Subdirectory Knowledge` note to your root rules file —
+  written once, if it isn't already there, and never edited again.
 
 Each step is proposed first; nothing happens without a yes. Nothing gets
 installed anywhere — `--init` only writes files inside your repo.
@@ -141,7 +142,7 @@ STALENESS=skills/house-rules/scripts/staleness.sh   # path from repo root, or wh
 ```
 
 See [`docs/how-it-works.md`](docs/how-it-works.md) for the full recipe
-(including a CI-step version).
+(including a CI-step version and a `post-commit` variant).
 
 ## Project state
 
@@ -150,7 +151,7 @@ Everything lives in the target repo, nothing in the plugin:
 | Path | Contents |
 |---|---|
 | `<dir>/AGENTS.md` | the area docs |
-| root `AGENTS.md` / `CLAUDE.md` | the `## Subdirectory Knowledge` index |
+| root `AGENTS.md` / `CLAUDE.md` | the `## Subdirectory Knowledge` note (static, written once by `--init`) |
 | `.claude/house-rules.lock.json` | shape-hash baselines + discovery ignore list |
 
 Adopting house-rules in a repo with pre-existing area docs? Run
@@ -171,7 +172,7 @@ In [`docs/`](docs/README.md):
 - [`docs/how-it-works.md`](docs/how-it-works.md) — **start here**: all the parts, and how to wire the checks into your own gate
 - [`docs/directory-mode.md`](docs/directory-mode.md) — `/house-rules [<dir> | <file.md>]`: document or refresh one directory
 - [`docs/all.md`](docs/all.md) — `/house-rules --all`: bulk-document every undocumented candidate
-- [`docs/init.md`](docs/init.md) — `/house-rules --init`: onboard a repo (manifest + index skeleton)
+- [`docs/init.md`](docs/init.md) — `/house-rules --init`: onboard a repo (manifest + static root note)
 - [`docs/check.md`](docs/check.md) — `/house-rules --check`: audit doc freshness on demand, report only
 - [`docs/backfill.md`](docs/backfill.md) — `/house-rules --backfill`: baseline area docs that predate the manifest
 
@@ -207,9 +208,10 @@ of the bundled scripts. No LLM involved.
 
 ## Notes
 
-- `/house-rules` never writes your root rules file's prose — it only maintains the
-  `## Subdirectory Knowledge` list, and only creates the file (minimal) if you
-  approve it during `--init`.
+- `/house-rules` never writes your root rules file's prose — `--init` adds one
+  static `## Subdirectory Knowledge` note (with consent), and creates the file
+  (minimal) if you approve it. No later run edits that note or lists
+  directories in it — an agent reads `<dir>/AGENTS.md` on demand instead.
 
 ## License
 

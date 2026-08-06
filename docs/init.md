@@ -1,8 +1,8 @@
 # `/house-rules --init` — onboard a repository
 
 Consent-driven scaffolding for a repo that wants house-rules. It builds the
-skeleton — the manifest `/house-rules --check` reads, and the root index — and
-generates **zero** area docs. Documenting directories is a separate, later
+skeleton — the manifest `/house-rules --check` reads, and a static root note —
+and generates **zero** area docs. Documenting directories is a separate, later
 decision (`/house-rules <dir>` or `--all`). `--init` installs nothing and
 registers no hooks; it only writes files inside the repo.
 
@@ -42,12 +42,26 @@ directory is ignored (git never descends into it), and `.claude/*` re-hides the
 rest (e.g. `settings.local.json`). Declining is fine for solo use: `--check`
 still works locally, the baselines just aren't shared.
 
-### 2. Scaffold the root index
+### 2. Add the subdirectory-knowledge note
 
-Adds an **empty** `## Subdirectory Knowledge` section (caption line, zero bullets)
-to the root rules file — `AGENTS.md` if present, else `CLAUDE.md`. If neither
-exists, it asks separately whether to create a minimal `AGENTS.md` containing only
-that section. Future documenting runs upsert their bullets here.
+Adds a **static** `## Subdirectory Knowledge` note to the root rules file —
+`AGENTS.md` if present, else `CLAUDE.md`. If neither exists, it asks
+separately whether to create a minimal `AGENTS.md` containing only that
+section:
+
+```markdown
+## Subdirectory Knowledge
+
+Dirs may carry their own `AGENTS.md` — local conventions, reference files,
+and tripwires, maintained by `/house-rules`. Read `<dir>/AGENTS.md` before
+editing files in that directory. None are loaded upfront — fetch the one you
+need, when you need it.
+```
+
+This note is fixed — later `/house-rules <dir>` and `--all` runs never edit
+it or list individual directories here. An agent that needs a directory's
+local rules reads `<dir>/AGENTS.md` directly when it gets there, keeping the
+root file's size independent of how many directories end up documented.
 
 That's the whole of `--init`. It doesn't install a hook or touch anything
 outside the repo — `/house-rules --check` is what you run to actually see

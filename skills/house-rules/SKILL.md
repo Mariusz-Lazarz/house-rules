@@ -4,8 +4,8 @@ description: >
   Modes: <dir> | --all | --init | --check | --backfill. Writes a directory's
   purpose and convention into a short AGENTS.md (120–250 words), inferred
   from real files on disk — never asked. `--all` bulk-documents candidate
-  directories via sub-agents; `--init` onboards a repo (manifest + root
-  index); `--check` audits doc freshness, read-only; `--backfill` baselines
+  directories via sub-agents; `--init` onboards a repo (manifest + a static
+  root note); `--check` audits doc freshness, read-only; `--backfill` baselines
   pre-existing docs. Use for API handlers, UI components, migrations, hooks,
   workers, a single integration client, middleware, etc. Trigger phrases:
   "house rules", "document this directory's pattern", "are the house rules
@@ -29,7 +29,7 @@ or `~/.agents/skills/`. Resolve their location once per run:
 
 - **`$SKILL_ROOT`** = the directory containing this `SKILL.md`.
 - The staleness engine is `$SKILL_ROOT/scripts/staleness.sh`
-  (subcommands: `write`, `check`, `hash`, `discover`, `ignore`).
+  (subcommands: `write`, `check`, `hash`, `discover`, `stale`, `ignore`).
 - The baseline backfiller is `$SKILL_ROOT/scripts/staleness-backfill.sh`.
 
 All project state lives in the **target repo**, never in the plugin:
@@ -52,7 +52,7 @@ suggestion.
    a. Is the target directory the repo root (`git rev-parse --show-toplevel`, when inside
       a git repo, resolves to the same directory)? → STOP: "/house-rules
       documents sub-directories only — it never writes the root rules file. For
-      project onboarding (manifest + index skeleton) run /house-rules --init."
+      project onboarding (manifest + root note) run /house-rules --init."
       Check this BEFORE the doc-length check below — a root `AGENTS.md` almost
       always exists and is almost always longer than 5 lines, which would
       otherwise silently route straight into Update path and start editing it.
@@ -114,6 +114,10 @@ invocation). It is optional.
 - Does not embed multi-line code blocks. Uses `@`-references to actual files.
 - Does not write generic advice ("write clean code", "be consistent"). If a rule
   cannot be checked against a diff, it gets cut.
+- Does not maintain a growing per-directory list in the root rules file. The
+  `## Subdirectory Knowledge` note is static, written once by `--init` if it
+  doesn't already exist — Create, Update, and `--all` never add, edit, or
+  upsert an entry there.
 
 ---
 
@@ -121,7 +125,7 @@ invocation). It is optional.
 
 Entered on `--init`. Onboards the current repo: creates the manifest that
 `/house-rules --check` (and any freshness check the user wires into their own
-pipeline) reads, and scaffolds the root index — **with the user's consent, and
+pipeline) reads, and adds the static root note — **with the user's consent, and
 without generating a single area doc**. Init builds the skeleton; documenting
 directories is a separate, later decision. Init installs nothing and registers
 no hooks — it only writes files inside the target repo.
@@ -156,17 +160,21 @@ no hooks — it only writes files inside the target repo.
      directory itself is ignored (git never descends into it), and `.claude/*`
      re-hides everything else there (e.g. `settings.local.json`). Declining is
      fine — a solo user may want the manifest local-only.
-   - **Scaffold the index?** Add an **empty** `## Subdirectory Knowledge` section
-     (the caption line only, zero bullets) to the root rules file. Use
-     `AGENTS.md` if it exists, else `CLAUDE.md`. If **neither** exists, ask
-     whether to create a minimal `AGENTS.md` containing only that section.
+   - **Add the subdirectory-knowledge note?** Add the fixed `## Subdirectory
+     Knowledge` note (below) to the root rules file. Use `AGENTS.md` if it
+     exists, else `CLAUDE.md`. If **neither** exists, ask whether to create a
+     minimal `AGENTS.md` containing only that section. This note is static —
+     written once, here, and never touched again. `/house-rules <dir>`,
+     `--all`, and Update never edit it or add a per-directory entry to it; an
+     agent that needs a directory's local rules reads `<dir>/AGENTS.md`
+     directly when it gets there.
 
 4. **Execute only what was approved.** Write the manifest via
    `Bash` (`mkdir -p .claude` + write the JSON skeleton — this one file is the
    exception to the never-by-hand rule, since the scripts create it on first
    `write`/`ignore` anyway). If un-ignoring was approved, append the three
-   `.gitignore` lines shown above via `Edit`/`Bash`. Add the index section with
-   a single `Edit`/`Write` touching nothing else in the file.
+   `.gitignore` lines shown above via `Edit`/`Bash`. Add the subdirectory-knowledge
+   note with a single `Edit`/`Write` touching nothing else in the file.
 
 5. **Report.** What was created, what was skipped (already present / declined),
    and the natural next steps: `/house-rules <dir>` for one directory,
@@ -177,12 +185,15 @@ no hooks — it only writes files inside the target repo.
    into a pre-push hook or CI step they write themselves; the skill doesn't
    install one.
 
-The index section skeleton:
+The note's fixed text:
 
 ```markdown
 ## Subdirectory Knowledge
 
-Scoped `AGENTS.md` docs, maintained by `/house-rules`.
+Dirs may carry their own `AGENTS.md` — local conventions, reference files,
+and tripwires, maintained by `/house-rules`. Read `<dir>/AGENTS.md` before
+editing files in that directory. None are loaded upfront — fetch the one you
+need, when you need it.
 ```
 
 ---
@@ -394,12 +405,7 @@ Then, each of the following is a hard gate. Revise if any fails.
 
 Single `Write` call to the resolved path.
 
-### Step 6 — Update the subdirectory knowledge index
-
-Run the **Subdirectory knowledge index (always)** section below. The area-doc word-count
-budget (120–250) is unaffected — the index lives in a different file.
-
-### Step 7 — Record the directory's shape hash
+### Step 6 — Record the directory's shape hash
 
 Run the **Shape hash (always)** section below so `/house-rules --check` (or a
 gate the user wires in themselves) knows this AGENTS.md is current as of the
@@ -414,7 +420,6 @@ Report back:
   stronger 'start here' pick than the others"
 - `## Extending`: included (one-sentence summary) or "omitted — no extension
   point was visible in the code"
-- subdirectory index: created / entry added / entry updated / skipped (no root file)
 - shape hash: recorded value for the directory
 
 ---
@@ -456,16 +461,12 @@ Preserve the user's authorial voice in anything that is still accurate.
    result. If the body has grown past 250 words from MISSING additions, trim
    lower-leverage KEEP content rather than dropping the new information.
 
-6. **Update the subdirectory knowledge index.** Run the **Subdirectory knowledge
-   index (always)** section below.
+6. **Record the directory's shape hash.** Run the **Shape hash (always)** section below.
 
-7. **Record the directory's shape hash.** Run the **Shape hash (always)** section below.
-
-8. **Report:** path, new body word count, one line each on what was updated, removed, and
+7. **Report:** path, new body word count, one line each on what was updated, removed, and
    added (e.g. *"1 updated (reference file renamed), 0 removed, 1 added (extension
    point in Extending)"*), whether `## Tripwires`/`## Reference`/`## Extending` are now
-   included or omitted, the subdirectory index result (created / entry added / entry updated
-   / skipped), and the recorded shape hash.
+   included or omitted, and the recorded shape hash.
 
 ---
 
@@ -508,31 +509,30 @@ Each sub-agent's prompt must instruct it to:
 
 - follow this skill's **Create path** for `<dir>` (Survey → reference file (or
   confirm there isn't one) → draft → the ten quality gates → single `Write`);
-- write **only** `<dir>/AGENTS.md` — it must NOT touch the root `AGENTS.md` index or
-  `.claude/house-rules.lock.json`; the parent performs both "always" steps afterward;
+- write **only** `<dir>/AGENTS.md` — it must NOT touch the root `AGENTS.md`/`CLAUDE.md`
+  or `.claude/house-rules.lock.json`; the parent performs the shape-hash step afterward.
+  The root `## Subdirectory Knowledge` note, if present, is static (written once by
+  `--init`) — nobody, sub-agent or parent, edits it here;
 - report back: path written, body word count, whether `## Tripwires`/`## Reference`/
   `## Extending` were included or omitted, and the summary phrase from its
   `# Area: … — <summary>` heading.
 
-### Step 5 — Serialize the shared files (parent)
+### Step 5 — Serialize the manifest (parent)
 
 After all sub-agents complete:
 
 For each **documented** directory, in turn:
-1. Upsert its bullet into the root `## Subdirectory Knowledge` list, following the
-   **Subdirectory knowledge index (always)** section (upsert key `@<dir>/AGENTS.md`,
-   bullets sorted by path, idempotent).
-2. Run `"$SKILL_ROOT/scripts/staleness.sh" write <dir>`.
+1. Run `"$SKILL_ROOT/scripts/staleness.sh" write <dir>`.
 
 For each directory the user chose **ignore permanently** in Step 3, in turn:
-3. Run `"$SKILL_ROOT/scripts/staleness.sh" ignore <dir>`. This is the step that
+2. Run `"$SKILL_ROOT/scripts/staleness.sh" ignore <dir>`. This is the step that
    actually fulfills the choice offered in Step 3 — without it, an "ignored"
    directory is never recorded anywhere and reappears as a candidate on the
    next `--all` or `--check`.
 
-The manifest and the root index are the reason sub-agents must not write them:
-concurrent edits to a shared file corrupt each other. Only the parent touches
-them, serially.
+`.claude/house-rules.lock.json` is the only file shared across sub-agents, which is
+why writing to it is serialized here rather than left to each sub-agent — concurrent
+writes to the same manifest would corrupt each other.
 
 ### Step 6 — Aggregate report
 
@@ -565,54 +565,6 @@ compute or edit the hash in the manifest by hand.
 `--check` can see drift on them — that's what `/house-rules --backfill` is
 for (see **Backfill path** above). Don't run `staleness-backfill.sh` directly
 for the user; point them at the flag.
-
----
-
-## Subdirectory knowledge index (always)
-
-Run this as the final step of **both** the Create path and the Update path — every time
-`/house-rules` documents a directory. (In `--all` mode the parent runs it after the
-sub-agents finish — a sub-agent skips it.) It maintains a single index list in
-the repo root that maps each scoped `AGENTS.md` to a few-word summary, so an agent
-landing at the root can see what local docs exist and where.
-
-This edits a **different file** from the area `AGENTS.md` you just wrote, so it does **not**
-count against that file's 120–250 word budget.
-
-1. **Resolve the repo root.** `git rev-parse --show-toplevel`. If not a git repo, walk up
-   from the target directory to the first directory containing `AGENTS.md` or `CLAUDE.md`.
-2. **Pick the root file.** Use `<root>/AGENTS.md` if it exists; otherwise fall back to
-   `<root>/CLAUDE.md`. If **neither** exists, **skip this step** — report "no root rules file
-   — index skipped". Never create a new root file here (that's `--init`'s job, with consent).
-3. **Compute the entry** from the area doc you just wrote:
-   - **Doc** = `@<path-relative-to-root>` with the doc's actual filename (e.g.
-     `@routes/AGENTS.md`, or `@routes/CLAUDE.md` when that is the file the
-     directory carries). This is the stable upsert key.
-   - **Summary** = the phrase after ` — ` in that doc's `# Area:` heading. If the heading
-     can't be parsed (no ` — `), fall back to the directory name and note it in the report.
-4. **Upsert into the `## Subdirectory Knowledge` list** in the root file. Each entry is one
-   bullet: `- @<doc> — <summary>`.
-   - **No `## Subdirectory Knowledge` section yet** → append one: the caption line, then this
-     bullet.
-   - **Section exists, a bullet with the same Doc path exists** → `Edit` only that bullet's
-     summary text.
-   - **Section exists, no bullet for this doc** → insert a new bullet, keeping bullets sorted
-     by Doc path.
-   - Idempotent: running twice must never duplicate a bullet — match on the `@<path>` Doc.
-
-Touch **only** the `## Subdirectory Knowledge` section. Never reflow or rewrite any other
-content in the root file.
-
-List format:
-
-```markdown
-## Subdirectory Knowledge
-
-Scoped `AGENTS.md` docs, maintained by `/house-rules`.
-
-- @controllers/AGENTS.md — Express CRUD handlers for REST resources
-- @routes/AGENTS.md — Express routers mapping REST verbs to controller functions
-```
 
 ---
 
